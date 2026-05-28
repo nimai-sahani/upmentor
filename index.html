@@ -776,27 +776,68 @@ footer{background:#040810;border-top:1px solid var(--border);padding:60px 5vw 32
         </a>
       </div>
     </div>
-    <div class="cform rv d2">
-      <div class="cfh">Request a Free Seminar</div>
-      <div class="cfsub">Fill this — we respond within 24 hours.</div>
-      <div class="fg"><label>Your Name</label><input type="text" placeholder="Principal / Teacher / Student"></div>
-      <div class="fg"><label>School / Institution</label><input type="text" placeholder="Name of your school or college"></div>
-      <div class="fg">
-        <label>You Are A…</label>
-        <select>
-          <option value="">Select your role</option>
-          <option>School Principal / Admin</option>
-          <option>Teacher / Educator</option>
-          <option>Student / Learner</option>
-          <option>Parent</option>
-          <option>Aspirant / Youth</option>
-          <option>Other</option>
-        </select>
-      </div>
-      <div class="fg"><label>Phone / WhatsApp</label><input type="tel" placeholder="+91 XXXXX XXXXX"></div>
-      <div class="fg"><label>Message (optional)</label><textarea placeholder="Tell us about your school, student count, or questions…"></textarea></div>
-      <button class="cfbtn" id="fBtn" onclick="sendForm(this)">SEND REQUEST →</button>
-    </div>
+    <form 
+  action="https://formsubmit.co/upmentor.education@gmail.com" 
+  method="POST"
+  class="cform rv d2"
+>
+
+  <div class="cfh">Request a Free Seminar</div>
+  <div class="cfsub">Fill this — we respond within 24 hours.</div>
+
+  <div class="fg">
+    <label>Your Name</label>
+    <input type="text" name="name" placeholder="Principal / Teacher / Student" required>
+  </div>
+
+  <div class="fg">
+    <label>School / Institution</label>
+    <input type="text" name="institution" placeholder="Name of your school or college" required>
+  </div>
+
+  <div class="fg">
+    <label>You Are A…</label>
+
+    <select name="role" required>
+      <option value="">Select your role</option>
+      <option>School Principal / Admin</option>
+      <option>Teacher / Educator</option>
+      <option>Student / Learner</option>
+      <option>Parent</option>
+      <option>Aspirant / Youth</option>
+      <option>Other</option>
+    </select>
+  </div>
+
+  <div class="fg">
+    <label>Phone / WhatsApp</label>
+    <input type="tel" name="phone" placeholder="+91 XXXXX XXXXX" required>
+  </div>
+
+  <div class="fg">
+    <label>Message (optional)</label>
+
+    <textarea 
+      name="message"
+      placeholder="Tell us about your school, student count, or questions…"
+    ></textarea>
+  </div>
+
+  <!-- Disable captcha -->
+  <input type="hidden" name="_captcha" value="false">
+
+  <!-- Redirect after submit -->
+  <input 
+    type="hidden" 
+    name="_next" 
+    value="https://upmentor.vercel.app"
+  >
+
+  <button class="cfbtn" type="submit">
+    SEND REQUEST →
+  </button>
+
+</form>
   </div>
 </section>
 
