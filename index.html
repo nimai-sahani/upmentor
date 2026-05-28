@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UpMentor — Level Up with AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Cabinet+Grotesk:wght@400;500;700;800;900&family=Playfair+Display:ital,wght@1,400;1,700&family=Familjen+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --void:#060a12;
+  --dark:#0a1020;
+  --card:#0e1628;
+  --border:#1a2540;
+  --navy:#0d1b3e;
+  --blue:#1554f0;
+  --cyan:#00c8ff;
+  --green:#39ff6a;
+  --lime:#a8ff3e;
+  --white:#f0f8ff;
+  --silver:#6a85b5;
+  --muted:#3a4f78;
+  --gold:#ffcc44;
+  --red:#ff3b5c;
+  --grad:linear-gradient(135deg,#00c8ff,#39ff6a);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:"Familjen Grotesk",sans-serif;background:var(--void);color:var(--white);overflow-x:hidden;cursor:none;}
+
+/* CURSOR */
+#cur{position:fixed;width:12px;height:12px;border-radius:50%;background:var(--cyan);top:0;left:0;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .2s,height .2s,background .2s;mix-blend-mode:screen;}
+#cur.big{width:56px;height:56px;background:rgba(0,200,255,.3);border-radius:4px;}
+#cur-r{position:fixed;width:38px;height:38px;border:1px solid rgba(0,200,255,.25);border-radius:50%;top:0;left:0;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);}
+
+/* NOISE */
+body::after{content:"";position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");pointer-events:none;z-index:0;}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:200;height:68px;padding:0 5vw;display:flex;align-items:center;justify-content:space-between;background:rgba(6,10,18,.8);backdrop-filter:blur(24px);border-bottom:1px solid var(--border);}
+.nlogo{display:flex;align-items:center;text-decoration:none;cursor:none;}
+.nlogo img{height:38px;width:auto;object-fit:contain;}
+.nlinks{display:flex;gap:32px;list-style:none;}
+.nlinks a{font-size:13px;letter-spacing:.5px;color:var(--silver);text-decoration:none;transition:color .2s;cursor:none;font-weight:500;}
+.nlinks a:hover{color:var(--white);}
+.ncta{background:linear-gradient(135deg,var(--blue),#0a8fd8);color:white;padding:10px 24px;font-size:13px;font-weight:800;letter-spacing:.5px;text-decoration:none;border-radius:100px;cursor:none;font-family:"Cabinet Grotesk",sans-serif;transition:transform .2s,box-shadow .2s;box-shadow:0 0 20px rgba(21,84,240,.3);}
+.ncta:hover{transform:scale(1.05);box-shadow:0 0 30px rgba(0,200,255,.4);}
+
+/* HERO */
+#hero{min-height:100vh;display:grid;grid-template-columns:1.1fr .9fr;align-items:center;padding:110px 5vw 120px;position:relative;overflow:hidden;gap:48px;}
+
+/* Animated mesh bg */
+.mesh{position:absolute;inset:0;background:
+  radial-gradient(ellipse 60% 50% at 80% 40%,rgba(21,84,240,.12) 0%,transparent 70%),
+  radial-gradient(ellipse 40% 40% at 20% 60%,rgba(0,200,255,.08) 0%,transparent 70%),
+  radial-gradient(ellipse 30% 30% at 60% 80%,rgba(57,255,106,.05) 0%,transparent 70%);
+  animation:meshAnim 10s ease-in-out infinite;}
+@keyframes meshAnim{0%,100%{opacity:1}50%{opacity:.7}}
+
+/* Grid lines */
+.hgrid{position:absolute;inset:0;background-image:linear-gradient(rgba(21,84,240,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(21,84,240,.05) 1px,transparent 1px);background-size:56px 56px;}
+
+/* Scan line */
+.scanline{position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);animation:scan 4s ease-in-out infinite;opacity:.3;}
+@keyframes scan{0%{top:0}100%{top:100%}}
+
+.hero-left{position:relative;z-index:2;}
+
+.hero-badge{display:inline-flex;align-items:center;gap:9px;background:rgba(0,200,255,.08);border:1px solid rgba(0,200,255,.2);padding:7px 18px;border-radius:100px;font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:var(--cyan);margin-bottom:30px;animation:rUp .7s ease forwards;opacity:0;}
+.ldot{width:7px;height:7px;background:var(--green);border-radius:50%;animation:ping 1.6s infinite;}
+@keyframes ping{0%{box-shadow:0 0 0 0 rgba(57,255,106,.6)}70%{box-shadow:0 0 0 8px rgba(57,255,106,0)}100%{box-shadow:0 0 0 0 rgba(57,255,106,0)}}
+
+h1.hh{font-family:"Cabinet Grotesk",sans-serif;font-weight:900;font-size:clamp(48px,7.5vw,100px);line-height:.88;letter-spacing:-3px;animation:rUp .8s .1s ease forwards;opacity:0;}
+h1.hh .grad{background:linear-gradient(135deg,var(--cyan),var(--lime));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+h1.hh .dim{opacity:.2;-webkit-text-stroke:1px rgba(255,255,255,.3);color:transparent;}
+h1.hh .serif{font-family:"Playfair Display",serif;font-style:italic;font-weight:700;font-size:.82em;letter-spacing:-1px;color:var(--white);}
+
+.hero-sub{font-size:16px;color:var(--silver);line-height:1.8;max-width:500px;margin-top:28px;animation:rUp .9s .2s ease forwards;opacity:0;}
+
+.hero-btns{display:flex;gap:14px;align-items:center;margin-top:40px;flex-wrap:wrap;animation:rUp 1s .3s ease forwards;opacity:0;}
+.btn-grad{background:linear-gradient(135deg,var(--blue),#00aaff);color:white;padding:17px 38px;font-size:14px;font-weight:800;font-family:"Cabinet Grotesk",sans-serif;border-radius:100px;text-decoration:none;cursor:none;transition:transform .2s,box-shadow .2s;box-shadow:0 0 30px rgba(21,84,240,.35);letter-spacing:.3px;position:relative;overflow:hidden;}
+.btn-grad::before{content:"";position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);transition:left .5s;}
+.btn-grad:hover::before{left:150%;}
+.btn-grad:hover{transform:scale(1.05);box-shadow:0 0 50px rgba(0,200,255,.4);}
+.btn-out{font-size:14px;color:var(--silver);text-decoration:none;cursor:none;display:flex;align-items:center;gap:7px;transition:color .2s;font-weight:500;}
+.btn-out:hover{color:var(--white);}
+.arr{transition:transform .2s;}
+.btn-out:hover .arr{transform:translateX(5px);}
+
+/* 4 CREDS STACK */
+.hero-right{position:relative;z-index:2;animation:rUp 1s .15s ease forwards;opacity:0;}
+.cred-stack{display:flex;flex-direction:column;gap:12px;}
+.cred-card{background:var(--card);border:1px solid var(--border);padding:22px 26px;display:flex;align-items:center;gap:18px;position:relative;overflow:hidden;transition:border-color .3s,transform .3s;cursor:none;}
+.cred-card:hover{border-color:rgba(0,200,255,.4);transform:translateX(6px);}
+.cred-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--grad);}
+.cred-icon{font-size:32px;flex-shrink:0;}
+.cred-info{flex:1;}
+.cred-name{font-family:"Cabinet Grotesk",sans-serif;font-size:15px;font-weight:800;margin-bottom:3px;}
+.cred-desc{font-size:12px;color:var(--silver);line-height:1.5;}
+.cred-badge{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--cyan);border:1px solid rgba(0,200,255,.25);padding:4px 10px;white-space:nowrap;border-radius:100px;font-weight:700;}
+
+.cred-card.c1::before{background:linear-gradient(var(--cyan),var(--blue));}
+.cred-card.c2::before{background:linear-gradient(var(--lime),var(--cyan));}
+.cred-card.c3::before{background:linear-gradient(var(--gold),#ff8800);}
+.cred-card.c4::before{background:linear-gradient(#ff6b9d,#ff3b5c);}
+.cred-card.c4{background:linear-gradient(135deg,rgba(255,59,92,.06),var(--card));}
+.cred-card.c4 .cred-badge{color:#ff6b9d;border-color:rgba(255,107,157,.25);}
+
+/* Stats strip */
+.hstats{position:absolute;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;z-index:2;animation:rUp 1.1s .4s ease forwards;opacity:0;}
+.hsi{flex:1;padding:18px 30px;border-right:1px solid var(--border);display:flex;flex-direction:column;gap:4px;}
+.hsi:last-child{border-right:none;}
+.hsin{font-family:"Cabinet Grotesk",sans-serif;font-size:28px;font-weight:900;line-height:1;}
+.hsin .ac{background:linear-gradient(135deg,var(--cyan),var(--lime));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hsil{font-size:10px;color:var(--silver);letter-spacing:1.5px;text-transform:uppercase;}
+
+/* Ticker */
+.tkbar{background:linear-gradient(90deg,var(--blue),#0090cc,var(--blue));padding:11px 0;overflow:hidden;position:relative;z-index:5;}
+.tktrack{display:flex;animation:tktick 28s linear infinite;white-space:nowrap;}
+@keyframes tktick{to{transform:translateX(-50%)}}
+.tki{display:inline-flex;align-items:center;gap:12px;padding:0 32px;font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:rgba(255,255,255,.85);font-weight:700;font-family:"Cabinet Grotesk",sans-serif;}
+.tki b{color:var(--lime);}
+
+@keyframes rUp{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:translateY(0)}}
+
+/* URGENCY */
+.urg{background:var(--dark);border-bottom:1px solid var(--border);padding:14px 5vw;display:flex;align-items:center;justify-content:center;gap:18px;flex-wrap:wrap;}
+.ufire{font-size:20px;animation:fw 2.5s infinite;}
+@keyframes fw{0%,75%,100%{transform:none}80%{transform:rotate(-8deg)}85%{transform:rotate(8deg)}}
+.utxt{font-size:13.5px;font-weight:600;}
+.utxt strong{color:var(--gold);}
+.uchip{background:var(--red);color:white;font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;padding:5px 14px;border-radius:100px;animation:bl 2s ease-in-out infinite;}
+@keyframes bl{0%,100%{opacity:1}50%{opacity:.5}}
+
+/* SECTION */
+.s{padding:100px 5vw;position:relative;}
+.salt{background:var(--dark);}
+.ey{font-size:10px;letter-spacing:5px;text-transform:uppercase;color:var(--cyan);margin-bottom:16px;display:flex;align-items:center;gap:12px;font-weight:700;}
+.ey::before{content:"";width:24px;height:2px;background:linear-gradient(var(--cyan),var(--lime));}
+.st{font-family:"Cabinet Grotesk",sans-serif;font-weight:900;font-size:clamp(32px,5vw,68px);line-height:.92;letter-spacing:-2px;max-width:700px;}
+.st em{font-family:"Playfair Display",serif;font-style:italic;font-weight:700;background:linear-gradient(135deg,var(--cyan),var(--lime));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-1px;}
+
+/* CREDENTIALS SHOWCASE SECTION */
+.creds-section{margin-top:64px;}
+.creds-headline{text-align:center;margin-bottom:56px;}
+.creds-headline p{font-size:16px;color:var(--silver);margin-top:14px;max-width:600px;margin-left:auto;margin-right:auto;line-height:1.75;}
+.creds-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;background:var(--border);}
+.cg{background:var(--void);padding:48px 32px;text-align:center;position:relative;overflow:hidden;cursor:none;transition:background .3s;}
+.cg:hover{background:var(--dark);}
+.cg::after{content:"";position:absolute;bottom:0;left:0;right:0;height:3px;transform:scaleX(0);transform-origin:left;transition:transform .4s;}
+.cg.g1::after{background:linear-gradient(90deg,var(--cyan),var(--blue));}
+.cg.g2::after{background:linear-gradient(90deg,var(--lime),var(--cyan));}
+.cg.g3::after{background:linear-gradient(90deg,var(--gold),#ff8800);}
+.cg.g4::after{background:linear-gradient(90deg,#ff6b9d,var(--red));}
+.cg:hover::after{transform:scaleX(1);}
+.cg-num{font-family:"Cabinet Grotesk",sans-serif;font-size:56px;font-weight:900;line-height:1;margin-bottom:8px;}
+.g1 .cg-num{background:linear-gradient(135deg,var(--cyan),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.g2 .cg-num{background:linear-gradient(135deg,var(--lime),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.g3 .cg-num{background:linear-gradient(135deg,var(--gold),#ff8800);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.g4 .cg-num{background:linear-gradient(135deg,#ff6b9d,var(--red));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.cg-icon{font-size:40px;margin-bottom:16px;display:block;}
+.cg-title{font-family:"Cabinet Grotesk",sans-serif;font-size:16px;font-weight:800;margin-bottom:10px;line-height:1.2;}
+.cg-body{font-size:12.5px;color:var(--silver);line-height:1.75;}
+.cg-tag{display:inline-block;margin-top:16px;font-size:9px;letter-spacing:2px;text-transform:uppercase;padding:4px 12px;border-radius:100px;font-weight:700;}
+.g1 .cg-tag{color:var(--cyan);border:1px solid rgba(0,200,255,.25);}
+.g2 .cg-tag{color:var(--lime);border:1px solid rgba(168,255,62,.25);}
+.g3 .cg-tag{color:var(--gold);border:1px solid rgba(255,204,68,.25);}
+.g4 .cg-tag{color:#ff6b9d;border:1px solid rgba(255,107,157,.25);}
+
+/* WHY BENTO */
+.bento{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--border);margin-top:64px;}
+.bc{background:var(--void);padding:44px 36px;position:relative;overflow:hidden;cursor:none;transition:background .3s;}
+.bc:hover{background:var(--dark);}
+.bc::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--cyan),var(--lime));transform:scaleX(0);transform-origin:left;transition:transform .4s;}
+.bc:hover::before{transform:scaleX(1);}
+.bc.feat{background:var(--navy);grid-column:span 2;}
+.bc.feat:hover{background:#0f2050;}
+.bc-n{font-family:"Cabinet Grotesk",sans-serif;font-size:64px;font-weight:900;color:rgba(0,200,255,.1);line-height:1;margin-bottom:12px;transition:color .3s;}
+.bc:hover .bc-n{color:rgba(0,200,255,.2);}
+.bc-h{font-family:"Cabinet Grotesk",sans-serif;font-size:18px;font-weight:800;margin-bottom:12px;line-height:1.2;}
+.bc.feat .bc-h{font-size:24px;}
+.bc-p{font-size:13.5px;color:var(--silver);line-height:1.85;}
+
+/* PROGRAMS */
+.prows{display:flex;flex-direction:column;gap:2px;margin-top:64px;}
+.prow{display:flex;align-items:stretch;border:1px solid var(--border);background:var(--card);overflow:hidden;cursor:none;transition:border-color .25s;position:relative;}
+.prow::after{content:"↗";position:absolute;right:22px;top:50%;transform:translateY(-50%);font-size:20px;color:var(--cyan);opacity:0;transition:opacity .2s,right .2s;}
+.prow:hover{border-color:rgba(0,200,255,.35);}
+.prow:hover::after{opacity:1;right:18px;}
+.pnum{width:76px;flex-shrink:0;background:rgba(0,200,255,.05);display:flex;align-items:center;justify-content:center;font-family:"Cabinet Grotesk",sans-serif;font-size:13px;font-weight:900;color:var(--cyan);letter-spacing:2px;border-right:1px solid var(--border);transition:background .25s,color .25s;}
+.prow:hover .pnum{background:linear-gradient(135deg,var(--blue),#0090cc);color:white;}
+.pico{width:76px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:30px;border-right:1px solid var(--border);}
+.pinf{padding:22px 26px;flex:1;}
+.pinf h3{font-family:"Cabinet Grotesk",sans-serif;font-size:17px;font-weight:800;margin-bottom:5px;}
+.pinf p{font-size:13px;color:var(--silver);line-height:1.7;}
+.ptag2{padding:0 24px;display:flex;align-items:center;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--cyan);border-left:1px solid var(--border);white-space:nowrap;font-weight:700;}
+
+/* CURRICULUM */
+.curr-g{display:grid;grid-template-columns:1.15fr 1fr;gap:56px;align-items:start;margin-top:64px;}
+.mods{display:flex;flex-direction:column;gap:2px;}
+.mod{display:flex;align-items:stretch;border:1px solid var(--border);background:var(--void);overflow:hidden;cursor:none;transition:border-color .2s;position:relative;}
+.mod::after{content:"›";position:absolute;right:16px;top:50%;transform:translateY(-50%);color:var(--cyan);font-size:20px;opacity:0;transition:opacity .2s;}
+.mod:hover{border-color:rgba(0,200,255,.35);}
+.mod:hover::after{opacity:1;}
+.mn{width:64px;flex-shrink:0;background:rgba(0,200,255,.05);display:flex;align-items:center;justify-content:center;font-family:"Cabinet Grotesk",sans-serif;font-size:18px;font-weight:900;color:var(--cyan);border-right:1px solid var(--border);transition:background .2s,color .2s;}
+.mod:hover .mn{background:linear-gradient(135deg,var(--blue),#0090cc);color:white;}
+.mb{padding:17px 22px;flex:1;}
+.mb h4{font-family:"Cabinet Grotesk",sans-serif;font-size:14px;font-weight:800;margin-bottom:3px;}
+.mb p{font-size:11.5px;color:var(--silver);}
+.mw{padding:0 18px;font-size:10px;letter-spacing:2px;color:var(--silver);display:flex;align-items:center;white-space:nowrap;text-transform:uppercase;}
+.mod.active-mod{border-color:var(--cyan);}
+.mod.active-mod .mn{background:linear-gradient(135deg,var(--blue),#0090cc);color:white;}
+.mod.active-mod .mw{color:var(--cyan);}
+
+.cside{position:sticky;top:84px;display:flex;flex-direction:column;gap:14px;}
+.ccrd{background:var(--card);border:1px solid var(--border);padding:34px;}
+.ccrd-l{font-size:10px;letter-spacing:3px;color:var(--cyan);text-transform:uppercase;font-weight:700;margin-bottom:12px;}
+.ccrd-t{font-family:"Playfair Display",serif;font-style:italic;font-size:20px;line-height:1.3;margin-bottom:12px;}
+.ccrd-b{font-size:13px;color:var(--silver);line-height:1.8;margin-bottom:22px;}
+.cstat-row{display:flex;border:1px solid var(--border);margin-top:20px;}
+.cstat{flex:1;padding:14px 16px;text-align:center;border-right:1px solid var(--border);}
+.cstat:last-child{border-right:none;}
+.csn{font-family:"Cabinet Grotesk",sans-serif;font-size:22px;font-weight:900;}
+.csn span{background:linear-gradient(135deg,var(--cyan),var(--lime));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.csl{font-size:10px;color:var(--silver);letter-spacing:1px;margin-top:2px;}
+
+/* AUDIENCE */
+.aud{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--border);margin-top:64px;}
+.ac{background:var(--void);padding:50px 34px;position:relative;overflow:hidden;cursor:none;transition:background .3s;}
+.ac:hover{background:var(--dark);}
+.ac::after{content:"";position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--cyan),var(--lime));transform:scaleX(0);transform-origin:left;transition:transform .4s;}
+.ac:hover::after{transform:scaleX(1);}
+.aem{font-size:48px;margin-bottom:20px;display:block;}
+.atg{font-size:10px;letter-spacing:3px;color:var(--cyan);text-transform:uppercase;margin-bottom:12px;display:block;font-weight:700;}
+.ahh{font-family:"Cabinet Grotesk",sans-serif;font-size:20px;font-weight:900;margin-bottom:14px;line-height:1.15;}
+.app{font-size:13px;color:var(--silver);line-height:1.8;margin-bottom:22px;}
+.abns{display:flex;flex-direction:column;gap:8px;}
+.abn{font-size:12.5px;color:var(--silver);display:flex;align-items:flex-start;gap:9px;}
+.abn::before{content:"✓";color:var(--green);font-size:11px;flex-shrink:0;margin-top:1px;font-weight:700;}
+
+/* FOMO */
+#fomo{background:linear-gradient(135deg,#060e28,#0a1840);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:80px 5vw;position:relative;overflow:hidden;}
+#fomo::before{content:"LEVEL UP";position:absolute;font-family:"Cabinet Grotesk",sans-serif;font-size:180px;font-weight:900;color:rgba(0,200,255,.03);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;letter-spacing:-5px;white-space:nowrap;}
+.fg-inner{display:grid;grid-template-columns:1fr auto;align-items:center;gap:60px;position:relative;z-index:2;}
+.fg-inner h2{font-family:"Cabinet Grotesk",sans-serif;font-size:clamp(28px,4.5vw,54px);font-weight:900;line-height:.9;letter-spacing:-2px;}
+.fg-inner h2 span{font-family:"Playfair Display",serif;font-style:italic;font-weight:700;background:linear-gradient(135deg,var(--cyan),var(--lime));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.fsub{font-size:15px;color:var(--silver);line-height:1.75;max-width:520px;margin-top:18px;}
+.fchips{display:flex;gap:12px;flex-wrap:wrap;margin-top:26px;}
+.fchip{display:flex;align-items:center;gap:8px;background:rgba(0,200,255,.06);border:1px solid rgba(0,200,255,.15);padding:9px 16px;border-radius:100px;font-size:12px;color:var(--silver);font-weight:500;}
+.fdot{width:7px;height:7px;background:var(--green);border-radius:50%;animation:ping 1.5s infinite;}
+.fright{display:flex;flex-direction:column;gap:14px;align-items:flex-end;}
+.btn-glow{background:linear-gradient(135deg,var(--blue),#0090cc);color:white;padding:22px 48px;font-family:"Cabinet Grotesk",sans-serif;font-size:15px;font-weight:900;text-decoration:none;border-radius:100px;cursor:none;white-space:nowrap;transition:transform .2s,box-shadow .2s;box-shadow:0 0 50px rgba(21,84,240,.4);letter-spacing:.3px;}
+.btn-glow:hover{transform:scale(1.06);box-shadow:0 0 80px rgba(0,200,255,.5);}
+.fnote{font-size:11px;color:var(--silver);text-align:right;letter-spacing:1px;}
+
+/* TESTIMONIALS */
+.tg{display:grid;grid-template-columns:2fr 1fr 1fr;gap:2px;background:var(--border);margin-top:64px;}
+.tc{background:var(--void);padding:44px 38px;display:flex;flex-direction:column;justify-content:space-between;gap:26px;cursor:none;transition:background .3s;}
+.tc:hover{background:var(--dark);}
+.tc.big{background:var(--navy);}
+.tc.big:hover{background:#0f2050;}
+.qm{font-family:"Playfair Display",serif;font-size:72px;color:var(--cyan);line-height:.8;opacity:.3;}
+.qt{font-family:"Playfair Display",serif;font-style:italic;font-size:clamp(14px,1.8vw,19px);line-height:1.65;color:var(--white);flex:1;}
+.ta{display:flex;align-items:center;gap:12px;}
+.tav{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--cyan));display:flex;align-items:center;justify-content:center;font-family:"Cabinet Grotesk",sans-serif;font-size:14px;font-weight:900;color:white;flex-shrink:0;}
+.tn{font-size:13px;font-weight:700;}
+.tr{font-size:11px;color:var(--silver);}
+.stars{color:var(--gold);font-size:12px;letter-spacing:2px;}
+
+/* SEAL */
+#seal{padding:100px 5vw;text-align:center;}
+.seal-ring{width:250px;height:250px;border-radius:50%;border:1px solid rgba(0,200,255,.2);display:flex;align-items:center;justify-content:center;margin:56px auto;position:relative;animation:spinSeal 22s linear infinite;}
+@keyframes spinSeal{to{transform:rotate(360deg)}}
+.seal-core{width:194px;height:194px;border-radius:50%;background:linear-gradient(135deg,var(--blue),#0090cc);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;animation:spinSeal 22s linear infinite reverse;box-shadow:0 0 80px rgba(21,84,240,.4),0 0 0 1px rgba(0,200,255,.2);}
+.seal-core span{font-size:50px;}
+.seal-core p{font-family:"Cabinet Grotesk",sans-serif;font-size:8px;letter-spacing:3px;color:rgba(255,255,255,.65);text-transform:uppercase;}
+
+/* CONTACT */
+#contact{background:var(--dark);}
+.con-g{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start;}
+.con-l h2{font-family:"Cabinet Grotesk",sans-serif;font-weight:900;font-size:clamp(30px,4vw,54px);line-height:.9;letter-spacing:-2px;margin-bottom:22px;}
+.con-l h2 em{font-family:"Playfair Display",serif;font-style:italic;font-weight:700;background:linear-gradient(135deg,var(--cyan),var(--lime));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.con-l p{font-size:15px;color:var(--silver);line-height:1.8;max-width:420px;}
+.clinks{display:flex;flex-direction:column;gap:10px;margin-top:36px;}
+.clink{display:flex;align-items:center;gap:16px;padding:16px 20px;background:var(--card);border:1px solid var(--border);text-decoration:none;cursor:none;transition:border-color .2s,background .2s;}
+.clink:hover{border-color:rgba(0,200,255,.35);background:#101e38;}
+.cl-ic{font-size:18px;width:24px;text-align:center;}
+.cl-in{display:flex;flex-direction:column;gap:2px;}
+.cl-lb{font-size:9px;letter-spacing:3px;color:var(--cyan);text-transform:uppercase;font-weight:700;}
+.cl-vl{font-size:13.5px;color:var(--white);font-weight:500;}
+.cform{background:var(--card);border:1px solid var(--border);padding:44px;}
+.cfh{font-family:"Cabinet Grotesk",sans-serif;font-size:19px;font-weight:900;margin-bottom:5px;}
+.cfsub{font-size:12.5px;color:var(--silver);margin-bottom:28px;}
+.fg{margin-bottom:16px;}
+.fg label{display:block;font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--silver);margin-bottom:7px;font-weight:700;}
+.fg input,.fg select,.fg textarea{width:100%;background:var(--void);border:1px solid var(--border);color:var(--white);padding:13px 16px;font-family:"Familjen Grotesk",sans-serif;font-size:14px;outline:none;transition:border-color .2s;cursor:none;border-radius:0;appearance:none;-webkit-appearance:none;}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--cyan);}
+.fg textarea{resize:vertical;min-height:86px;}
+.fg select option{background:var(--dark);}
+.cfbtn{width:100%;background:linear-gradient(135deg,var(--blue),#0090cc);color:white;padding:16px;font-size:13px;font-weight:900;font-family:"Cabinet Grotesk",sans-serif;letter-spacing:.5px;border:none;cursor:none;transition:opacity .2s,box-shadow .2s;box-shadow:0 0 20px rgba(21,84,240,.3);border-radius:100px;}
+.cfbtn:hover{opacity:.9;box-shadow:0 0 40px rgba(0,200,255,.4);}
+.cfbtn.ok{background:linear-gradient(135deg,var(--green),var(--cyan));color:var(--void);}
+
+/* FOOTER */
+footer{background:#040810;border-top:1px solid var(--border);padding:60px 5vw 32px;}
+.ft{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:48px;flex-wrap:wrap;gap:36px;}
+.ftag{font-size:13px;color:var(--silver);margin-top:6px;font-family:"Playfair Display",serif;font-style:italic;}
+.floc{font-size:11px;color:var(--muted);margin-top:10px;letter-spacing:1px;}
+.fcols{display:flex;gap:56px;flex-wrap:wrap;}
+.fcol h4{font-size:9px;letter-spacing:4px;text-transform:uppercase;color:var(--cyan);margin-bottom:16px;font-weight:700;}
+.fcol ul{list-style:none;display:flex;flex-direction:column;gap:9px;}
+.fcol a{font-size:13px;color:var(--silver);text-decoration:none;cursor:none;transition:color .2s;font-weight:500;}
+.fcol a:hover{color:var(--white);}
+.fb{border-top:1px solid var(--border);padding-top:22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
+.fb p{font-size:11px;color:var(--muted);}
+.fb span{font-size:10px;letter-spacing:3px;color:var(--cyan);font-weight:700;}
+
+/* REVEAL */
+.rv{opacity:0;transform:translateY(30px);transition:opacity .65s ease,transform .65s ease;}
+.rv.on{opacity:1;transform:none;}
+.rv.d1{transition-delay:.1s;}.rv.d2{transition-delay:.2s;}.rv.d3{transition-delay:.3s;}.rv.d4{transition-delay:.4s;}
+
+/* MOBILE */
+@media(max-width:900px){
+  .nlinks{display:none;}
+  #hero{grid-template-columns:1fr;padding-bottom:150px;}
+  .hero-right{display:none;}
+  .s{padding:72px 5vw;}
+  .creds-grid{grid-template-columns:1fr 1fr;}
+  .bento{grid-template-columns:1fr 1fr;}
+  .bc.feat{grid-column:span 2;}
+  .curr-g{grid-template-columns:1fr;}
+  .aud{grid-template-columns:1fr;}
+  .tg{grid-template-columns:1fr;}
+  .fg-inner{grid-template-columns:1fr;}
+  .fright{align-items:flex-start;}
+  .con-g{grid-template-columns:1fr;}
+  body{cursor:auto;}
+  #cur,#cur-r{display:none;}
+}
+@media(max-width:600px){
+  .creds-grid{grid-template-columns:1fr;}
+  .bento{grid-template-columns:1fr;}
+  .bc.feat{grid-column:span 1;}
+  h1.hh{letter-spacing:-2px;}
+  .ptag2{display:none;}
+}
+</style>
+</head>
+<body>
+
+<div id="cur"></div>
+<div id="cur-r"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nlogo">
+ <img 
+    src="./assets/upmentorlogo.png" 
+    style="
+      width:80px;
+      height:80px;
+      object-fit:cover;
+      border-radius:50%;
+      border:2px solid rgba(0,200,255,.3);
+    "
+  >  </a>
+  <ul class="nlinks">
+    <li><a href="#why">Why AI</a></li>
+    <li><a href="#credentials">Credentials</a></li>
+    <li><a href="#programs">Programs</a></li>
+    <li><a href="#curriculum">Curriculum</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <a href="#contact" class="ncta">Partner Now →</a>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="mesh"></div>
+  <div class="hgrid"></div>
+  <div class="scanline"></div>
+
+  <div class="hero-left">
+    <div class="hero-badge">
+      <span class="ldot"></span>
+      Enrolling Schools · 2025–26
+    </div>
+
+    <h1 class="hh">
+      LEVEL<br>
+      <span class="serif">up or get</span><br>
+      <span class="grad">LEFT</span><br>
+      <span class="dim">BEHIND.</span>
+    </h1>
+
+    <p class="hero-sub">
+      UpMentor brings structured AI literacy to schools — equipping students, teachers and aspirants with in-demand AI skills <em>plus</em> 4 powerful credentials that open every door.
+    </p>
+
+    <div class="hero-btns">
+      <a href="#contact" class="btn-grad">Get Your School Enrolled →</a>
+      <a href="#credentials" class="btn-out">
+        See the 4 Credentials
+        <span class="arr">→</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="cred-stack">
+      <div class="cred-card c1">
+        <span class="cred-icon">📜</span>
+        <div class="cred-info">
+          <div class="cred-name">Course Completion Certificate</div>
+          <div class="cred-desc">Verified proof of AI literacy mastery with a unique certificate ID</div>
+        </div>
+        <div class="cred-badge">Credential #1</div>
+      </div>
+      <div class="cred-card c2">
+        <span class="cred-icon">💼</span>
+        <div class="cred-info">
+          <div class="cred-name">Internship Certificate</div>
+          <div class="cred-desc">Real-world experience with an official internship certification</div>
+        </div>
+        <div class="cred-badge">Credential #2</div>
+      </div>
+      <div class="cred-card c3">
+        <span class="cred-icon">🏆</span>
+        <div class="cred-info">
+          <div class="cred-name">Outstanding Performance Award</div>
+          <div class="cred-desc">Exclusive recognition for top performers — rare, prestigious</div>
+        </div>
+        <div class="cred-badge">Credential #3</div>
+      </div>
+      <div class="cred-card c4">
+        <span class="cred-icon">✍️</span>
+        <div class="cred-info">
+          <div class="cred-name">Letter of Recommendation</div>
+          <div class="cred-desc">A personal LOR from UpMentor leadership — for college & jobs</div>
+        </div>
+        <div class="cred-badge">Credential #4</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hstats">
+    <div class="hsi"><div class="hsin">4<span class="ac"> creds</span></div><div class="hsil">Per learner</div></div>
+    <div class="hsi"><div class="hsin">6<span class="ac">+</span></div><div class="hsil">AI Modules</div></div>
+    <div class="hsi"><div class="hsin">4–8<span class="ac">wk</span></div><div class="hsil">Program</div></div>
+    <div class="hsi"><div class="hsin">₹0</div><div class="hsil">Entry Seminar</div></div>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="tkbar">
+  <div class="tktrack">
+    <span class="tki">Course Certificate <b>✦</b></span>
+    <span class="tki">Internship Certificate <b>✦</b></span>
+    <span class="tki">Outstanding Award <b>✦</b></span>
+    <span class="tki">Letter of Recommendation <b>✦</b></span>
+    <span class="tki">AI Literacy <b>✦</b></span>
+    <span class="tki">Prompt Engineering <b>✦</b></span>
+    <span class="tki">AI Ethics <b>✦</b></span>
+    <span class="tki">School Branding <b>✦</b></span>
+    <span class="tki">Course Certificate <b>✦</b></span>
+    <span class="tki">Internship Certificate <b>✦</b></span>
+    <span class="tki">Outstanding Award <b>✦</b></span>
+    <span class="tki">Letter of Recommendation <b>✦</b></span>
+    <span class="tki">AI Literacy <b>✦</b></span>
+    <span class="tki">Prompt Engineering <b>✦</b></span>
+    <span class="tki">AI Ethics <b>✦</b></span>
+    <span class="tki">School Branding <b>✦</b></span>
+  </div>
+</div>
+
+<!-- URGENCY -->
+<div class="urg">
+  <span class="ufire">🔥</span>
+  <span class="utxt">Schools that partner this semester lock in <strong>exclusive territory rights</strong> — we don't partner with competitor schools in the same area.</span>
+  <span class="uchip">Only 12 slots left</span>
+</div>
+
+<!-- CREDENTIALS SECTION -->
+<section id="credentials" class="s salt">
+  <div class="creds-headline rv">
+    <div class="ey" style="justify-content:center;">What Every Learner Earns</div>
+    <h2 class="st" style="text-align:center;max-width:700px;margin:0 auto;">Not one certificate.<br><em>Four credentials.</em></h2>
+    <p>Most programs give you a participation certificate. UpMentor gives you a complete credential portfolio — the kind that actually opens doors to colleges, companies, and careers.</p>
+  </div>
+
+  <div class="creds-grid">
+    <div class="cg g1 rv">
+      <span class="cg-icon">📜</span>
+      <div class="cg-num">01</div>
+      <div class="cg-title">Course Completion Certificate</div>
+      <p class="cg-body">A verified, project-backed certificate with a unique ID confirming your AI literacy mastery. Shareable on LinkedIn, valid for college applications and job interviews.</p>
+      <span class="cg-tag">Verified ✓</span>
+    </div>
+    <div class="cg g2 rv d1">
+      <span class="cg-icon">💼</span>
+      <div class="cg-num">02</div>
+      <div class="cg-title">Internship Certificate</div>
+      <p class="cg-body">Real-world experience through the UpMentor partner network. An official internship certification that proves you've applied AI skills beyond the classroom.</p>
+      <span class="cg-tag">Real-world ✓</span>
+    </div>
+    <div class="cg g3 rv d2">
+      <span class="cg-icon">🏆</span>
+      <div class="cg-num">03</div>
+      <div class="cg-title">Outstanding Performance Certificate</div>
+      <p class="cg-body">Awarded exclusively to top performers. Rare. Prestigious. A signal to any college or employer that this person doesn't just learn — they excel.</p>
+      <span class="cg-tag">Selective ✓</span>
+    </div>
+    <div class="cg g4 rv d3">
+      <span class="cg-icon">✍️</span>
+      <div class="cg-num">04</div>
+      <div class="cg-title">Letter of Recommendation (LOR)</div>
+      <p class="cg-body">A personalised LOR from UpMentor leadership — addressing the learner's specific strengths, AI skills, and potential. The kind of letter that tips admission decisions.</p>
+      <span class="cg-tag">High-value ✓</span>
+    </div>
+  </div>
+</section>
+
+<!-- WHY NOW -->
+<section id="why" class="s">
+  <div class="ey rv">The Reality</div>
+  <h2 class="st rv">AI isn't coming.<br><em>It's already here.</em></h2>
+  <div class="bento">
+    <div class="bc rv">
+      <div class="bc-n">85%</div>
+      <div class="bc-h">Students Already Use AI Daily</div>
+      <p class="bc-p">Without guidance, ethics, or understanding. They're using career-defining tools completely blind — and no one is showing them how to do it right.</p>
+    </div>
+    <div class="bc rv d1">
+      <div class="bc-n">&lt;5%</div>
+      <div class="bc-h">Schools Have Any AI Curriculum</div>
+      <p class="bc-p">The gap between what students need and what schools teach is enormous. The first schools to close it will define the next era of education.</p>
+    </div>
+    <div class="bc rv d2">
+      <div class="bc-n">10×</div>
+      <div class="bc-h">Productivity Boost</div>
+      <p class="bc-p">Trained students don't just use AI tools — they leverage them. They study smarter, research faster, and outperform their peers consistently.</p>
+    </div>
+    <div class="bc feat rv d1">
+      <div class="bc-n" style="font-size:88px;">NOW</div>
+      <div class="bc-h">The First-Mover Window Is Closing</div>
+      <p class="bc-p">UpMentor only partners with one school per area. The first school to sign up locks in exclusive AI-education branding in their locality — permanently. Second place means starting from scratch. There is no third.</p>
+    </div>
+  </div>
+</section>
+
+<!-- PROGRAMS -->
+<section id="programs" class="s salt">
+  <div class="ey rv">What We Bring</div>
+  <h2 class="st rv">Complete AI education.<br><em>Zero effort from you.</em></h2>
+  <div class="prows">
+    <div class="prow rv">
+      <div class="pnum">01</div><div class="pico">🎓</div>
+      <div class="pinf"><h3>AI Literacy Workshops</h3><p>Structured, hands-on sessions from foundations to practical mastery. Students go from confused to confident in weeks.</p></div>
+      <div class="ptag2">Student Program</div>
+    </div>
+    <div class="prow rv d1">
+      <div class="pnum">02</div><div class="pico">📜</div>
+      <div class="pinf"><h3>4 Verified Credentials Per Learner</h3><p>Course cert + Internship cert + Outstanding cert + LOR. The most complete credential stack any AI program offers students today.</p></div>
+      <div class="ptag2">Signature Feature</div>
+    </div>
+    <div class="prow rv d2">
+      <div class="pnum">03</div><div class="pico">👩‍🏫</div>
+      <div class="pinf"><h3>Teacher AI Training</h3><p>Educators learn to use AI tools confidently. Your faculty evolves alongside your students — always included in the package.</p></div>
+      <div class="ptag2">Faculty</div>
+    </div>
+    <div class="prow rv d1">
+      <div class="pnum">04</div><div class="pico">🏅</div>
+      <div class="pinf"><h3>AI-Enabled School Branding</h3><p>Official partner badge, banners, and digital assets. The designation parents now actively look for when choosing schools.</p></div>
+      <div class="ptag2">Branding</div>
+    </div>
+    <div class="prow rv d2">
+      <div class="pnum">05</div><div class="pico">🏆</div>
+      <div class="pinf"><h3>Annual AI Competition</h3><p>School-hosted showcases that build community pride, generate local press, and give students a stage to prove their skills.</p></div>
+      <div class="ptag2">Events</div>
+    </div>
+    <div class="prow rv d3">
+      <div class="pnum">06</div><div class="pico">🔒</div>
+      <div class="pinf"><h3>Exclusive Territory Rights</h3><p>One school per city area. Your competitor cannot buy what you already own. Sign first — and own the narrative permanently.</p></div>
+      <div class="ptag2">Exclusive</div>
+    </div>
+  </div>
+</section>
+
+<!-- CURRICULUM -->
+<section id="curriculum" class="s">
+  <div class="ey rv">The Program</div>
+  <h2 class="st rv">6 modules.<br><em>One transformation.</em></h2>
+  <div class="curr-g">
+    <div class="mods">
+      <div class="mod rv"><div class="mn">01</div><div class="mb"><h4>Understanding AI</h4><p>What AI is · Types · Myths vs Reality · Career impact</p></div><div class="mw">Week 1</div></div>
+      <div class="mod rv d1"><div class="mn">02</div><div class="mb"><h4>AI Tools Ecosystem</h4><p>ChatGPT · Gemini · Canva AI · Productivity platforms</p></div><div class="mw">Week 2</div></div>
+      <div class="mod rv d2"><div class="mn">03</div><div class="mb"><h4>Prompt Engineering</h4><p>Structured prompts · Workflow design · Output optimization</p></div><div class="mw">Week 3–4</div></div>
+      <div class="mod rv d1"><div class="mn">04</div><div class="mb"><h4>AI for Students</h4><p>Assignments · Research · Presentations · Study systems</p></div><div class="mw">Week 4–5</div></div>
+      <div class="mod rv d2"><div class="mn">05</div><div class="mb"><h4>AI Ethics &amp; Risks</h4><p>Misinformation · Privacy · Plagiarism · Responsibility</p></div><div class="mw">Week 6</div></div>
+      <div class="mod active-mod rv d3"><div class="mn">06</div><div class="mb"><h4>Project + All 4 Credentials 🎓</h4><p>Build real AI project · Present · Earn all 4 credentials</p></div><div class="mw">Week 7–8</div></div>
+    </div>
+    <div class="cside">
+      <div class="ccrd rv">
+        <div class="ccrd-l">Free Entry Point</div>
+        <div class="ccrd-t">"How AI Will Change Careers &amp; Education"</div>
+        <p class="ccrd-b">60 minutes. Zero cost. Zero commitment. A live session that changes how your students see their future — delivered right to your school.</p>
+        <a href="#contact" class="btn-grad" style="display:inline-block;text-decoration:none;font-size:13px;padding:13px 26px;">Book Free Seminar →</a>
+        <div class="cstat-row">
+          <div class="cstat"><div class="csn">4<span>–</span>8</div><div class="csl">Weeks</div></div>
+          <div class="cstat"><div class="csn">6</div><div class="csl">Modules</div></div>
+          <div class="cstat"><div class="csn">4<span>🏅</span></div><div class="csl">Credentials</div></div>
+        </div>
+      </div>
+      <div class="ccrd rv d1" style="background:linear-gradient(135deg,rgba(21,84,240,.15),var(--card));border-color:rgba(0,200,255,.2);">
+        <div class="ccrd-l">Exclusive Rule</div>
+        <div class="ccrd-t" style="font-family:'Cabinet Grotesk',sans-serif;font-style:normal;font-size:18px;font-weight:900;">One school per area. Always.</div>
+        <p class="ccrd-b">We don't partner with competing schools in the same locality. Sign up first — and your competitors can never have what you have.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AUDIENCE -->
+<section id="audience" class="s salt">
+  <div class="ey rv">Who This Is For</div>
+  <h2 class="st rv">Built for<br><em>everyone who's next.</em></h2>
+  <div class="aud">
+    <div class="ac rv">
+      <span class="aem">🏫</span>
+      <span class="atg">For Schools &amp; Principals</span>
+      <h3 class="ahh">Be the School That Gets There First.</h3>
+      <p class="app">Position your institution as a leader in modern education. Give parents a reason to choose you and students a reason to stay.</p>
+      <div class="abns">
+        <div class="abn">Official AI-Enabled School badge + branding assets</div>
+        <div class="abn">Zero infrastructure investment required</div>
+        <div class="abn">Teacher upskilling included in every package</div>
+        <div class="abn">Exclusive territory — competitors locked out</div>
+        <div class="abn">Annual AI competition hosted at your campus</div>
+      </div>
+    </div>
+    <div class="ac rv d1">
+      <span class="aem">🧑‍💻</span>
+      <span class="atg">For Students &amp; Learners</span>
+      <h3 class="ahh">Earn 4 Credentials. Stand Out Forever.</h3>
+      <p class="app">The students who complete UpMentor don't just get AI skills. They walk away with a credential portfolio that no competitor can match.</p>
+      <div class="abns">
+        <div class="abn">Course Completion Certificate (verified ID)</div>
+        <div class="abn">Internship Certificate from real-world experience</div>
+        <div class="abn">Outstanding Performance Award (selective)</div>
+        <div class="abn">Letter of Recommendation from UpMentor leadership</div>
+        <div class="abn">AI skills that 10× your productivity today</div>
+      </div>
+    </div>
+    <div class="ac rv d2">
+      <span class="aem">🚀</span>
+      <span class="atg">For Aspirants &amp; Youth</span>
+      <h3 class="ahh">The Skill + Credential Combo Nobody Else Has.</h3>
+      <p class="app">Preparing for college, competitive exams, or your first job? AI literacy + 4 credentials is the differentiator nobody else is offering yet.</p>
+      <div class="abns">
+        <div class="abn">4 credentials that strengthen every application</div>
+        <div class="abn">Practical AI skills for every career path</div>
+        <div class="abn">LOR from UpMentor that tips admission decisions</div>
+        <div class="abn">Community of ambitious, forward-thinking peers</div>
+        <div class="abn">First-mover advantage in your field</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOMO -->
+<section id="fomo">
+  <div class="fg-inner">
+    <div>
+      <h2>While you wait,<br><span>someone else decides.</span></h2>
+      <p class="fsub">One slot per city. The first school locks in exclusive UpMentor branding — permanently. The second school just watches. There is no third option.</p>
+      <div class="fchips">
+        <div class="fchip"><span class="fdot"></span><span id="liveC">43 people</span> viewing right now</div>
+        <div class="fchip"><span class="fdot" style="background:var(--gold);"></span>12 school slots left this semester</div>
+      </div>
+    </div>
+    <div class="fright">
+      <a href="#contact" class="btn-glow">Claim Your School's Slot →</a>
+      <p class="fnote">Free seminar · No commitment required</p>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="testimonials" class="s salt">
+  <div class="ey rv">Early Voices</div>
+  <h2 class="st rv">What people<br><em>are saying.</em></h2>
+  <div class="tg">
+    <div class="tc big rv">
+      <div>
+        <div class="stars">★★★★★</div>
+        <div class="qm">"</div>
+        <p class="qt">When I heard about the 4 credentials — course cert, internship cert, outstanding award, and a personal LOR — I immediately called the team. No other program in our city offers anything close to this. We signed up that same day.</p>
+      </div>
+      <div class="ta">
+        <div class="tav">SP</div>
+        <div><div class="tn">School Principal</div><div class="tr">Private School, Bhubaneswar</div></div>
+      </div>
+    </div>
+    <div class="tc rv d1">
+      <div>
+        <div class="stars">★★★★★</div>
+        <div class="qm">"</div>
+        <p class="qt">The LOR from UpMentor helped me get into my preferred college. It was specific, powerful, and mentioned skills that other applicants couldn't even name.</p>
+      </div>
+      <div class="ta">
+        <div class="tav" style="background:linear-gradient(135deg,var(--green),var(--cyan));color:var(--void);">R</div>
+        <div><div class="tn">Riya, Class 12</div><div class="tr">Program Graduate</div></div>
+      </div>
+    </div>
+    <div class="tc rv d2">
+      <div>
+        <div class="stars">★★★★★</div>
+        <div class="qm">"</div>
+        <p class="qt">I earned the Outstanding Award. I didn't expect it to matter so much — but every interviewer I've met since has asked about it first.</p>
+      </div>
+      <div class="ta">
+        <div class="tav" style="background:linear-gradient(135deg,var(--gold),#ff8800);color:var(--void);">AK</div>
+        <div><div class="tn">Arjun K.</div><div class="tr">Aspirant, Engineering</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SEAL -->
+<section id="seal">
+  <div class="ey rv" style="justify-content:center;">Partnership</div>
+  <h2 class="st rv" style="text-align:center;max-width:560px;margin:0 auto;">Wear the badge.<br><em>Lead the change.</em></h2>
+  <div class="seal-ring rv">
+    <div class="seal-core">
+ <img 
+    src="./assets/upmentorlogo.png" 
+    style="
+      width:80px;
+      height:80px;
+      object-fit:cover;
+      border-radius:50%;
+      border:2px solid rgba(0,200,255,.3);
+    "
+  >      <p>CERTIFIED PARTNER</p>
+    </div>
+  </div>
+  <p class="rv" style="text-align:center;max-width:500px;margin:0 auto;color:var(--silver);font-size:15px;line-height:1.8;">Partner schools receive official branding — banners, digital badges, and the "AI-Enabled School Partner" designation that parents and students now actively search for.</p>
+  <div style="text-align:center;margin-top:36px;" class="rv d1">
+    <a href="#contact" class="btn-grad" style="display:inline-block;text-decoration:none;">Become a Partner School →</a>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact" class="s">
+  <div class="con-g">
+    <div class="con-l rv">
+      <h2>Let's build<br>this <em>together.</em></h2>
+      <p>Start with a free 60-minute seminar. No cost. No commitment. Just bring your students and let the program speak.</p>
+      <div class="clinks">
+        <a href="mailto:upmentor.education@gmail.com" class="clink">
+          <span class="cl-ic">✉️</span>
+          <div class="cl-in"><span class="cl-lb">Email</span><span class="cl-vl">upmentor.education@gmail.com</span></div>
+        </a>
+        <a href="tel:+918260156717" class="clink">
+          <span class="cl-ic">📞</span>
+          <div class="cl-in"><span class="cl-lb">Phone</span><span class="cl-vl">+91 82601 56717 / +91 84800 46645</span></div>
+        </a>
+        <a href="https://instagram.com/joinupmentor" target="_blank" class="clink">
+          <span class="cl-ic">📸</span>
+          <div class="cl-in"><span class="cl-lb">Instagram</span><span class="cl-vl">@joinupmentor</span></div>
+        </a>
+        <a href="https://upmentor.vercel.app" target="_blank" class="clink">
+          <span class="cl-ic">🌐</span>
+          <div class="cl-in"><span class="cl-lb">Website</span><span class="cl-vl">upmentor.vercel.app</span></div>
+        </a>
+      </div>
+    </div>
+    <div class="cform rv d2">
+      <div class="cfh">Request a Free Seminar</div>
+      <div class="cfsub">Fill this — we respond within 24 hours.</div>
+      <div class="fg"><label>Your Name</label><input type="text" placeholder="Principal / Teacher / Student"></div>
+      <div class="fg"><label>School / Institution</label><input type="text" placeholder="Name of your school or college"></div>
+      <div class="fg">
+        <label>You Are A…</label>
+        <select>
+          <option value="">Select your role</option>
+          <option>School Principal / Admin</option>
+          <option>Teacher / Educator</option>
+          <option>Student / Learner</option>
+          <option>Parent</option>
+          <option>Aspirant / Youth</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="fg"><label>Phone / WhatsApp</label><input type="tel" placeholder="+91 XXXXX XXXXX"></div>
+      <div class="fg"><label>Message (optional)</label><textarea placeholder="Tell us about your school, student count, or questions…"></textarea></div>
+      <button class="cfbtn" id="fBtn" onclick="sendForm(this)">SEND REQUEST →</button>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="ft">
+    <div>
+       <img 
+    src="./assets/upmentorlogo.png" 
+    style="
+      width:80px;
+      height:80px;
+      object-fit:cover;
+      border-radius:50%;
+      border:2px solid rgba(0,200,255,.3);
+    "
+  >
+      <div class="ftag">Level up with AI.</div>
+      <div class="floc">Bhubaneswar, Odisha · India</div>
+    </div>
+    <div class="fcols">
+      <div class="fcol">
+        <h4>Programs</h4>
+        <ul>
+          <li><a href="#programs">AI Literacy Workshops</a></li>
+          <li><a href="#credentials">4 Credentials</a></li>
+          <li><a href="#programs">Teacher Training</a></li>
+          <li><a href="#programs">School Partnership</a></li>
+        </ul>
+      </div>
+      <div class="fcol">
+        <h4>For You</h4>
+        <ul>
+          <li><a href="#audience">Schools</a></li>
+          <li><a href="#audience">Students</a></li>
+          <li><a href="#audience">Aspirants</a></li>
+          <li><a href="#contact">Contact Us</a></li>
+        </ul>
+      </div>
+      <div class="fcol">
+        <h4>Connect</h4>
+        <ul>
+          <li><a href="https://instagram.com/aventris.ai" target="_blank">@aventris.ai</a></li>
+          <li><a href="mailto:aventris.education@gmail.com">Email Us</a></li>
+          <li><a href="https://aventris.vercel.app" target="_blank">aventris.vercel.app</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="fb">
+    <p>© 2025 UpMentor Edutech Private Limited. All rights reserved.</p>
+    <span>AI LITERACY · FUTURE SKILLS · REAL IMPACT</span>
+  </div>
+</footer>
+
+<script>
+const cur=document.getElementById("cur");
+const ring=document.getElementById("cur-r");
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener("mousemove",e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+"px";cur.style.top=my+"px";});
+(function loop(){rx+=(mx-rx)*.1;ry+=(my-ry)*.1;ring.style.left=rx+"px";ring.style.top=ry+"px";requestAnimationFrame(loop);})();
+document.querySelectorAll("a,button,.bc,.prow,.ac,.mod,.tc,.cred-card,.cg").forEach(el=>{
+  el.addEventListener("mouseenter",()=>cur.classList.add("big"));
+  el.addEventListener("mouseleave",()=>cur.classList.remove("big"));
+});
+
+const rvEls=document.querySelectorAll(".rv");
+const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add("on");});},{threshold:.07});
+rvEls.forEach(el=>obs.observe(el));
+
+const liveEl=document.getElementById("liveC");
+function upd(){const n=28+Math.floor(Math.random()*32);if(liveEl)liveEl.textContent=n+" people";}
+upd();setInterval(upd,5500);
+
+function sendForm(btn){btn.textContent="✓ Sent! We'll reach out within 24 hours.";btn.classList.add("ok");btn.disabled=true;}
+
+window.addEventListener("scroll",()=>{document.querySelector("nav").style.background=window.scrollY>70?"rgba(6,10,18,.95)":"rgba(6,10,18,.8)";});
+</script>
+</body>
+</html>
