@@ -776,68 +776,208 @@ footer{background:#040810;border-top:1px solid var(--border);padding:60px 5vw 32
         </a>
       </div>
     </div>
-    <form 
+    <form  
   action="https://formsubmit.co/upmentor.education@gmail.com" 
   method="POST"
   class="cform rv d2"
+  id="seminarForm"
 >
 
   <div class="cfh">Request a Free Seminar</div>
-  <div class="cfsub">Fill this — we respond within 24 hours.</div>
 
+  <div class="cfsub">
+    Fill this — we respond within 24 hours.
+  </div>
+
+  <!-- NAME -->
   <div class="fg">
     <label>Your Name</label>
-    <input type="text" name="name" placeholder="Principal / Teacher / Student" required>
+
+    <input 
+      type="text" 
+      name="name" 
+      placeholder="Principal / Teacher / Student" 
+      required
+    >
   </div>
 
+  <!-- SCHOOL -->
   <div class="fg">
     <label>School / Institution</label>
-    <input type="text" name="institution" placeholder="Name of your school or college" required>
+
+    <input 
+      type="text" 
+      name="institution" 
+      placeholder="Name of your school or college" 
+      required
+    >
   </div>
 
+  <!-- ROLE -->
   <div class="fg">
+
     <label>You Are A…</label>
 
     <select name="role" required>
+
       <option value="">Select your role</option>
+
       <option>School Principal / Admin</option>
+
       <option>Teacher / Educator</option>
+
       <option>Student / Learner</option>
+
       <option>Parent</option>
+
       <option>Aspirant / Youth</option>
+
       <option>Other</option>
+
     </select>
+
   </div>
 
+  <!-- EMAIL -->
   <div class="fg">
+
+    <label>Email Address</label>
+
+    <input 
+      type="email" 
+      name="email" 
+      placeholder="example@gmail.com"
+      required
+    >
+
+  </div>
+
+  <!-- PHONE -->
+  <div class="fg">
+
     <label>Phone / WhatsApp</label>
-    <input type="tel" name="phone" placeholder="+91 XXXXX XXXXX" required>
+
+    <input 
+      type="tel" 
+      name="phone" 
+      placeholder="+91 XXXXX XXXXX" 
+      required
+    >
+
   </div>
 
+  <!-- MESSAGE -->
   <div class="fg">
+
     <label>Message (optional)</label>
 
     <textarea 
       name="message"
       placeholder="Tell us about your school, student count, or questions…"
     ></textarea>
+
   </div>
 
-  <!-- Disable captcha -->
+  <!-- HIDDEN -->
   <input type="hidden" name="_captcha" value="false">
 
-  <!-- Redirect after submit -->
-  <input 
-    type="hidden" 
-    name="_next" 
-    value="https://upmentor.vercel.app"
+  <!-- BUTTON -->
+  <button 
+    class="cfbtn" 
+    id="submitBtn" 
+    type="submit"
   >
-
-  <button class="cfbtn" type="submit">
     SEND REQUEST →
   </button>
 
+  <!-- SUCCESS MESSAGE -->
+  <div 
+    id="successMessage"
+    style="
+      display:none;
+      margin-top:20px;
+      padding:16px;
+      border-radius:16px;
+      background:rgba(57,255,106,.08);
+      border:1px solid rgba(57,255,106,.25);
+      color:#39ff6a;
+      font-weight:700;
+      animation:pop .5s ease;
+    "
+  >
+
+    ✅ Request Sent Successfully!
+
+    <br><br>
+
+    <span style="color:#aaa;font-size:13px;">
+
+      Our team will contact you within 24 hours.
+
+    </span>
+
+  </div>
+
 </form>
+
+<style>
+
+@keyframes pop{
+
+  0%{
+    opacity:0;
+    transform:translateY(20px) scale(.9);
+  }
+
+  100%{
+    opacity:1;
+    transform:translateY(0) scale(1);
+  }
+
+}
+
+</style>
+
+<script>
+
+const form = document.getElementById("seminarForm");
+
+const submitBtn = document.getElementById("submitBtn");
+
+const successMessage =
+document.getElementById("successMessage");
+
+form.addEventListener("submit", async function(e){
+
+  e.preventDefault();
+
+  submitBtn.innerHTML = "SENDING...";
+
+  submitBtn.style.opacity = "0.7";
+
+  const formData = new FormData(form);
+
+  await fetch(form.action,{
+
+    method:"POST",
+
+    body:formData
+
+  });
+
+  submitBtn.innerHTML = "SENT ✓";
+
+  submitBtn.style.background =
+  "linear-gradient(135deg,#39ff6a,#00c8ff)";
+
+  successMessage.style.display = "block";
+
+  form.reset();
+
+});
+
+</script>
+ 
   </div>
 </section>
 
